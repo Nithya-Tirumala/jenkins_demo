@@ -5,35 +5,52 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo 'building docker image'
-                sh('docker build -t sainammi/jenkins-demo-pipeline .')
+                
+                sh('docker build -t tirumalanithya123/nithyaimage .')
             }
         }
-        stage('Publish to Hub/Registry') {
-            environment {
-                Docker_Creds = credentials('Docker_Creds')
-            }
-            steps {
-                echo 'username - $Docker_Creds_USR , password - $Docker_Creds_PSW'
-                sh('docker login -u $Docker_Creds_USR -p $Docker_Creds_PSW')
-                echo "successfully connected to Docker-Hub"
-                echo 'publishing to Hub'
-                sh('docker push sainammi/jenkins-demo-pipeline')
+        
+        
+        stage('Publish to Dockerhub') {
+            steps {             
+                
+                sh('docker login -u tirumalanithya123 -p nithya@123')
+                
+                sh('docker push tirumalanithya123/nithyaimage')
+                
                 echo 'pushed image to docker hub'
             }
         }
-        stage('pull image from hub/registry') {
+        
+        
+        stage('pull image from Dockerhub') {
             steps {
-                echo 'pulling image from docker hub'
-                sh('docker pull sainammi/jenkins-demo-pipeline')
-                echo 'pulled image sainammi/jenkins-demo-pipeline'
+                
+                sh('docker pull tirumalanithya123/nithyaimage')
+                
+                echo 'pulled image from Dockerhub'
+                
                 sh('docker images')
+                
+                echo 'Displayed previous images && pulled image' 
             }
         }
+        
+        
         stage('start a container') {
             steps {
-                sh('docker run -it -d -p 8081:8080 --name sai-jenkins-web-server sainammi/jenkins-demo-pipeline')
-                sh('docker exec sai-jenkins-web-server service nginx start')
+                sh '''if [ $(docker ps | awk \'{print $NF}\' | grep nithya-jenkins-container123) = \'-nithya-jenkins-container123\' ]; then
+                        docker stop "nithya-jenkins-container123"
+                        docker rm "nithya-jenkins-container123"
+                      fi'''
+               
+                sh('docker run -it -d -p 8081:80 --name nithya-jenkins-container123 tirumalanithya123/nithyaimage')
+                
+                sh('docker exec nithya-jenkins-container123 service nginx start')
+                
             }
         }
     }
+
 }
+
